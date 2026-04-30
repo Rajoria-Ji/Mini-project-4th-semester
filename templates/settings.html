@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | AI Email Intelligence</title>
+    <script src="/static/theme-init.js"></script>
+    <link rel="stylesheet" href="/static/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#0a0e1a; color:#fff; min-height:100vh; }
+
+        .sidebar { position:fixed; left:0; top:0; bottom:0; width:240px; background:rgba(255,255,255,0.03); border-right:1px solid rgba(255,255,255,0.07); padding:24px 16px; display:flex; flex-direction:column; z-index:100; }
+        .sidebar-logo { display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:32px; }
+        .sidebar-logo-icon { width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,#6366f1,#8b5cf6); display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 4px 12px rgba(99,102,241,0.35); }
+        .sidebar-logo span { font-size:14px; font-weight:700; color:#fff; }
+        .sidebar-section { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:rgba(255,255,255,0.25); padding:0 12px; margin-bottom:8px; }
+        .sidebar-nav { display:flex; flex-direction:column; gap:2px; margin-bottom:24px; }
+        .sidebar-link { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; text-decoration:none; font-size:14px; font-weight:500; color:rgba(255,255,255,0.5); transition:all 0.2s; }
+        .sidebar-link i { width:18px; text-align:center; font-size:13px; }
+        .sidebar-link:hover { background:rgba(255,255,255,0.06); color:#fff; }
+        .sidebar-link.active { background:rgba(99,102,241,0.15); color:#818cf8; }
+        .sidebar-link.active i { color:#6366f1; }
+        .sidebar-footer { margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,0.07); }
+        .logout-btn { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; text-decoration:none; font-size:14px; font-weight:500; color:rgba(255,255,255,0.4); transition:all 0.2s; width:100%; background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; }
+        .logout-btn:hover { background:rgba(239,68,68,0.1); color:#f87171; }
+
+        .main { margin-left:240px; padding:32px; max-width:900px; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+        .topbar-left h1 { font-size:24px; font-weight:800; letter-spacing:-0.5px; }
+        .topbar-left p { font-size:13px; color:rgba(255,255,255,0.4); margin-top:3px; }
+
+        /* Settings sections */
+        .settings-grid { display:flex; flex-direction:column; gap:20px; }
+        .settings-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:18px; overflow:hidden; }
+        .settings-card-header { padding:18px 24px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; gap:10px; }
+        .settings-card-header i { color:#6366f1; font-size:15px; }
+        .settings-card-header h2 { font-size:15px; font-weight:700; }
+        .settings-card-header p { font-size:12px; color:rgba(255,255,255,0.35); margin-top:2px; }
+        .settings-body { padding:24px; display:flex; flex-direction:column; gap:20px; }
+
+        .setting-row { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:16px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px; }
+        .setting-info h3 { font-size:14px; font-weight:600; margin-bottom:3px; }
+        .setting-info p { font-size:12px; color:rgba(255,255,255,0.4); }
+
+        /* Toggle switch */
+        .toggle { position:relative; width:48px; height:26px; flex-shrink:0; }
+        .toggle input { opacity:0; width:0; height:0; }
+        .toggle-slider { position:absolute; inset:0; background:rgba(255,255,255,0.1); border-radius:100px; cursor:pointer; transition:0.3s; border:1px solid rgba(255,255,255,0.15); }
+        .toggle-slider::before { content:''; position:absolute; width:20px; height:20px; left:2px; top:2px; background:#fff; border-radius:50%; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.3); }
+        .toggle input:checked + .toggle-slider { background:linear-gradient(135deg,#6366f1,#8b5cf6); border-color:transparent; }
+        .toggle input:checked + .toggle-slider::before { transform:translateX(22px); }
+
+        /* Accent colors */
+        .color-swatches { display:flex; gap:8px; }
+        .color-swatch { width:28px; height:28px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:all 0.2s; position:relative; }
+        .color-swatch:hover { transform:scale(1.15); }
+        .color-swatch.active { border-color:#fff; box-shadow:0 0 0 2px rgba(255,255,255,0.3); }
+        .swatch-indigo { background:linear-gradient(135deg,#6366f1,#8b5cf6); }
+        .swatch-blue   { background:linear-gradient(135deg,#3b82f6,#60a5fa); }
+        .swatch-violet { background:linear-gradient(135deg,#7c3aed,#a78bfa); }
+        .swatch-emerald{ background:linear-gradient(135deg,#059669,#34d399); }
+        .swatch-rose   { background:linear-gradient(135deg,#e11d48,#fb7185); }
+
+        /* Radio buttons */
+        .radio-group { display:flex; gap:8px; flex-wrap:wrap; }
+        .radio-option { padding:7px 16px; border-radius:100px; border:1px solid rgba(255,255,255,0.1); font-size:13px; font-weight:500; color:rgba(255,255,255,0.5); cursor:pointer; transition:all 0.2s; user-select:none; }
+        .radio-option:hover { border-color:rgba(99,102,241,0.4); color:#818cf8; }
+        .radio-option.active { background:rgba(99,102,241,0.15); border-color:#6366f1; color:#818cf8; }
+
+        /* Theme visual toggle */
+        .theme-toggle-wrap { display:flex; gap:10px; }
+        .theme-btn { display:flex; align-items:center; gap:8px; padding:9px 18px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.5); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; }
+        .theme-btn:hover { border-color:rgba(99,102,241,0.4); }
+        .theme-btn.active { background:rgba(99,102,241,0.15); border-color:#6366f1; color:#818cf8; }
+        .theme-btn i { font-size:14px; }
+
+        /* Toast */
+        .toast { position:fixed; bottom:24px; right:24px; background:linear-gradient(135deg,#059669,#10b981); color:#fff; padding:12px 18px; border-radius:12px; font-size:13px; font-weight:500; display:flex; align-items:center; gap:8px; box-shadow:0 8px 24px rgba(5,150,105,0.4); transform:translateY(80px); opacity:0; transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index:1000; }
+        .toast.show { transform:translateY(0); opacity:1; }
+
+        /* Stat chips in about section */
+        .about-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+        .about-chip { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:16px; text-align:center; }
+        .about-chip-val { font-size:22px; font-weight:800; color:#818cf8; letter-spacing:-0.5px; }
+        .about-chip-label { font-size:11px; color:rgba(255,255,255,0.35); margin-top:4px; text-transform:uppercase; letter-spacing:0.5px; }
+
+        /* Danger zone */
+        .danger-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.15); border-radius:12px; }
+        .danger-row h3 { font-size:14px; font-weight:600; color:#f87171; }
+        .danger-row p { font-size:12px; color:rgba(239,68,68,0.5); margin-top:2px; }
+        .btn-danger-sm { padding:8px 16px; border-radius:8px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); color:#f87171; font-size:13px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.2s; }
+        .btn-danger-sm:hover { background:rgba(239,68,68,0.22); }
+        .credentials-note { font-size:12px; color:rgba(255,255,255,0.35); padding:12px 16px; background:rgba(255,255,255,0.02); border-radius:10px; border:1px solid rgba(255,255,255,0.06); }
+        .credentials-note code { color:#818cf8; background:rgba(99,102,241,0.12); padding:2px 7px; border-radius:5px; font-size:12px; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🤖</div>
+        <span>AI Mail Intel</span>
+    </div>
+    <div class="sidebar-section">Navigation</div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="sidebar-link"><i class="fas fa-table-columns"></i> Dashboard</a>
+        <a href="/stats"     class="sidebar-link"><i class="fas fa-chart-pie"></i> Analytics</a>
+        <a href="/"          class="sidebar-link"><i class="fas fa-envelope-open"></i> Submit Email</a>
+    </nav>
+    <div class="sidebar-section">Preferences</div>
+    <nav class="sidebar-nav">
+        <a href="/settings" class="sidebar-link active"><i class="fas fa-sliders"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1>Settings</h1>
+            <p>Customize your dashboard experience</p>
+        </div>
+    </div>
+
+    <div class="settings-grid">
+
+        <!-- Appearance -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <i class="fas fa-palette"></i>
+                <div>
+                    <h2>Appearance</h2>
+                    <p>Theme, accent color and visual preferences</p>
+                </div>
+            </div>
+            <div class="settings-body">
+
+                <!-- Theme -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h3>Color Theme</h3>
+                        <p>Switch between dark and light mode</p>
+                    </div>
+                    <div class="theme-toggle-wrap">
+                        <button class="theme-btn" id="btnDark" onclick="setTheme('dark')">
+                            <i class="fas fa-moon"></i> Dark
+                        </button>
+                        <button class="theme-btn" id="btnLight" onclick="setTheme('light')">
+                            <i class="fas fa-sun"></i> Light
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Accent Color -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h3>Accent Color</h3>
+                        <p>Highlight color used across the interface</p>
+                    </div>
+                    <div class="color-swatches" id="swatches">
+                        <div class="color-swatch swatch-indigo" data-accent="indigo" onclick="setAccent('indigo')" title="Indigo"></div>
+                        <div class="color-swatch swatch-blue"   data-accent="blue"   onclick="setAccent('blue')"   title="Blue"></div>
+                        <div class="color-swatch swatch-violet" data-accent="violet" onclick="setAccent('violet')" title="Violet"></div>
+                        <div class="color-swatch swatch-emerald"data-accent="emerald"onclick="setAccent('emerald')"title="Emerald"></div>
+                        <div class="color-swatch swatch-rose"   data-accent="rose"   onclick="setAccent('rose')"   title="Rose"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Display -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <i class="fas fa-display"></i>
+                <div>
+                    <h2>Display</h2>
+                    <p>Font size, table layout and density</p>
+                </div>
+            </div>
+            <div class="settings-body">
+
+                <!-- Font Size -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h3>Font Size</h3>
+                        <p>Controls text size across all pages</p>
+                    </div>
+                    <div class="radio-group" id="fontSizeGroup">
+                        <div class="radio-option" data-val="small"  onclick="setFontSize('small')">Small</div>
+                        <div class="radio-option" data-val="medium" onclick="setFontSize('medium')">Medium</div>
+                        <div class="radio-option" data-val="large"  onclick="setFontSize('large')">Large</div>
+                    </div>
+                </div>
+
+                <!-- Table Density -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h3>Table Density</h3>
+                        <p>How compact the email table rows appear</p>
+                    </div>
+                    <div class="radio-group" id="densityGroup">
+                        <div class="radio-option" data-val="compact"     onclick="setDensity('compact')">Compact</div>
+                        <div class="radio-option" data-val="comfortable" onclick="setDensity('comfortable')">Comfortable</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Account -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <i class="fas fa-user-shield"></i>
+                <div>
+                    <h2>Account & Security</h2>
+                    <p>Admin credentials and access control</p>
+                </div>
+            </div>
+            <div class="settings-body">
+                <div class="credentials-note">
+                    <i class="fas fa-info-circle" style="color:#6366f1;margin-right:6px;"></i>
+                    To change admin credentials, edit <code>app.py</code> and update
+                    <code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code> on lines 51–52.
+                    Flask will auto-reload the change instantly.
+                </div>
+                <div class="danger-row">
+                    <div>
+                        <h3>Clear All Email Records</h3>
+                        <p>Permanently delete every email from the database</p>
+                    </div>
+                    <form method="POST" action="/clear">
+                        <button type="submit" class="btn-danger-sm" onclick="return confirm('Delete ALL records? This cannot be undone.')">
+                            <i class="fas fa-trash" style="margin-right:5px;"></i>Clear All
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- About -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <i class="fas fa-circle-info"></i>
+                <div>
+                    <h2>About</h2>
+                    <p>System information and model details</p>
+                </div>
+            </div>
+            <div class="settings-body">
+                <div class="about-grid">
+                    <div class="about-chip">
+                        <div class="about-chip-val">v1.0</div>
+                        <div class="about-chip-label">App Version</div>
+                    </div>
+                    <div class="about-chip">
+                        <div class="about-chip-val">100</div>
+                        <div class="about-chip-label">Training Samples</div>
+                    </div>
+                    <div class="about-chip">
+                        <div class="about-chip-val">4</div>
+                        <div class="about-chip-label">Intent Classes</div>
+                    </div>
+                    <div class="about-chip">
+                        <div class="about-chip-val" style="font-size:14px;">Gemini</div>
+                        <div class="about-chip-label">AI Reply Engine</div>
+                    </div>
+                    <div class="about-chip">
+                        <div class="about-chip-val" style="font-size:14px;">NaiveBayes</div>
+                        <div class="about-chip-label">ML Classifier</div>
+                    </div>
+                    <div class="about-chip">
+                        <div class="about-chip-val" style="font-size:14px;">TextBlob</div>
+                        <div class="about-chip-label">Sentiment Engine</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Setting saved!</span></div>
+
+<script>
+    // ── Helpers ──────────────────────────────────────────
+    function showToast(msg) {
+        document.getElementById('toastMsg').textContent = msg;
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // ── Theme ─────────────────────────────────────────────
+    function setTheme(val) {
+        document.documentElement.setAttribute('data-theme', val);
+        localStorage.setItem('ai_theme', val);
+        document.getElementById('btnDark').classList.toggle('active', val === 'dark');
+        document.getElementById('btnLight').classList.toggle('active', val === 'light');
+        showToast(val === 'dark' ? 'Dark mode enabled' : 'Light mode enabled');
+    }
+
+    // ── Accent ───────────────────────────────────────────
+    function setAccent(val) {
+        document.documentElement.setAttribute('data-accent', val);
+        localStorage.setItem('ai_accent', val);
+        document.querySelectorAll('.color-swatch').forEach(el => {
+            el.classList.toggle('active', el.dataset.accent === val);
+        });
+        showToast('Accent color updated');
+    }
+
+    // ── Font Size ─────────────────────────────────────────
+    function setFontSize(val) {
+        document.documentElement.setAttribute('data-font-size', val);
+        localStorage.setItem('ai_fontSize', val);
+        document.querySelectorAll('#fontSizeGroup .radio-option').forEach(el => {
+            el.classList.toggle('active', el.dataset.val === val);
+        });
+        showToast('Font size set to ' + val);
+    }
+
+    // ── Density ───────────────────────────────────────────
+    function setDensity(val) {
+        document.documentElement.setAttribute('data-density', val);
+        localStorage.setItem('ai_density', val);
+        document.querySelectorAll('#densityGroup .radio-option').forEach(el => {
+            el.classList.toggle('active', el.dataset.val === val);
+        });
+        showToast('Table density updated');
+    }
+
+    // ── Init UI from stored values ─────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+        const theme    = localStorage.getItem('ai_theme')    || 'dark';
+        const accent   = localStorage.getItem('ai_accent')   || 'indigo';
+        const fontSize = localStorage.getItem('ai_fontSize') || 'medium';
+        const density  = localStorage.getItem('ai_density')  || 'comfortable';
+
+        document.getElementById('btnDark').classList.toggle('active',  theme === 'dark');
+        document.getElementById('btnLight').classList.toggle('active', theme === 'light');
+
+        document.querySelectorAll('.color-swatch').forEach(el =>
+            el.classList.toggle('active', el.dataset.accent === accent));
+
+        document.querySelectorAll('#fontSizeGroup .radio-option').forEach(el =>
+            el.classList.toggle('active', el.dataset.val === fontSize));
+
+        document.querySelectorAll('#densityGroup .radio-option').forEach(el =>
+            el.classList.toggle('active', el.dataset.val === density));
+    });
+</script>
+</body>
+</html>

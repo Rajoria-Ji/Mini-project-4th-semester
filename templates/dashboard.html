@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AI Email Intelligence</title>
+    <script src="/static/theme-init.js"></script>
+    <link rel="stylesheet" href="/static/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0e1a; color: #fff; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 240px;
+            background: rgba(255,255,255,0.03);
+            border-right: 1px solid rgba(255,255,255,0.07);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .sidebar-logo {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; margin-bottom: 32px;
+        }
+        .sidebar-logo-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: linear-gradient(135deg,#6366f1,#8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+        }
+        .sidebar-logo span { font-size: 14px; font-weight: 700; color: #fff; }
+
+        .sidebar-section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.25); padding: 0 12px; margin-bottom: 8px; }
+
+        .sidebar-nav { display: flex; flex-direction: column; gap: 2px; margin-bottom: 24px; }
+        .sidebar-link {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            text-decoration: none; font-size: 14px; font-weight: 500;
+            color: rgba(255,255,255,0.5); transition: all 0.2s;
+        }
+        .sidebar-link i { width: 18px; text-align: center; font-size: 13px; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+        .sidebar-link.active { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .sidebar-link.active i { color: #6366f1; }
+
+        .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); }
+        .logout-btn {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            text-decoration: none; font-size: 14px; font-weight: 500;
+            color: rgba(255,255,255,0.4); transition: all 0.2s; width: 100%;
+            background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.1); color: #f87171; }
+
+        /* Main */
+        .main { margin-left: 240px; padding: 32px; min-height: 100vh; }
+
+        /* Top bar */
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        .topbar-left h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .topbar-left p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+        .topbar-right { display: flex; gap: 10px; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 16px; border-radius: 10px; font-size: 13px;
+            font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; text-decoration: none; transition: all 0.2s; border: none;
+        }
+        .btn-primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+        .btn-primary:hover { box-shadow: 0 6px 20px rgba(99,102,241,0.45); transform: translateY(-1px); }
+        .btn-ghost { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+        /* Stats row */
+        .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+        .stat-card {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 20px; transition: all 0.2s;
+        }
+        .stat-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-2px); }
+        .stat-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; margin-bottom: 14px;
+        }
+        .stat-icon.indigo { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .stat-icon.yellow { background: rgba(251,191,36,0.12); color: #fbbf24; }
+        .stat-icon.green  { background: rgba(52,211,153,0.12); color: #34d399; }
+        .stat-icon.red    { background: rgba(239,68,68,0.12);  color: #f87171; }
+        .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+        .stat-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Filters */
+        .filters-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px; padding: 20px 24px; margin-bottom: 20px;
+        }
+        .filters-title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+        .filters-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+        .filter-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.3); min-width: 60px; }
+
+        .filter-chip {
+            padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 500;
+            text-decoration: none; color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.2s;
+        }
+        .filter-chip:hover { background: rgba(99,102,241,0.12); color: #818cf8; border-color: rgba(99,102,241,0.3); }
+        .filter-chip.active { background: rgba(99,102,241,0.18); color: #818cf8; border-color: #6366f1; }
+
+        .chip-pending  { --c: rgba(251,191,36,0.18);  --cc: #fbbf24; }
+        .chip-resolved { --c: rgba(52,211,153,0.18);  --cc: #34d399; }
+        .chip-escalated{ --c: rgba(239,68,68,0.18);   --cc: #f87171; }
+        .chip-review   { --c: rgba(251,146,60,0.18);  --cc: #fb923c; }
+        .chip-high     { --c: rgba(239,68,68,0.18);   --cc: #f87171; }
+        .chip-medium   { --c: rgba(251,146,60,0.18);  --cc: #fb923c; }
+        .chip-low      { --c: rgba(52,211,153,0.18);  --cc: #34d399; }
+
+        /* Table */
+        .table-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 18px; overflow: hidden;
+        }
+        .table-header-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .table-header-bar h3 { font-size: 15px; font-weight: 700; }
+        .table-count {
+            font-size: 12px; color: rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.05); border-radius: 100px;
+            padding: 3px 10px;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            padding: 12px 20px; text-align: left;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+            color: rgba(255,255,255,0.3); background: rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        tbody tr {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,0.03); }
+        tbody td { padding: 14px 20px; font-size: 14px; color: rgba(255,255,255,0.75); vertical-align: middle; }
+
+        .td-subject { font-weight: 600; color: #fff; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Badges */
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 600;
+        }
+        .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+        .badge-pending   { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+        .badge-pending::before { background: #fbbf24; }
+        .badge-resolved  { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+        .badge-resolved::before { background: #34d399; }
+        .badge-escalated { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .badge-escalated::before { background: #f87171; }
+        .badge-review    { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+        .badge-review::before { background: #fb923c; }
+
+        .priority-dot {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12px; font-weight: 600;
+        }
+        .priority-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
+        .priority-high   { color: #f87171; } .priority-high::before   { background: #f87171; box-shadow: 0 0 6px #f87171; }
+        .priority-medium { color: #fb923c; } .priority-medium::before { background: #fb923c; }
+        .priority-low    { color: #34d399; } .priority-low::before    { background: #34d399; }
+
+        .sentiment-tag { font-size: 12px; font-weight: 600; }
+        .sent-positive { color: #34d399; }
+        .sent-negative { color: #f87171; }
+        .sent-neutral  { color: #94a3b8; }
+
+        .intent-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 600;
+            background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.2);
+        }
+
+        .conf-bar-wrap { display: flex; align-items: center; gap: 8px; }
+        .conf-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
+        .conf-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg,#6366f1,#8b5cf6); }
+        .conf-val { font-size: 11px; color: rgba(255,255,255,0.4); min-width: 36px; text-align: right; }
+
+        .actions { display: flex; gap: 6px; }
+        .action-btn {
+            padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            text-decoration: none; transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+            border: none; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+        .action-edit { background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.2); }
+        .action-edit:hover { background: rgba(99,102,241,0.2); }
+        .action-resolve { background: rgba(52,211,153,0.1); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+        .action-resolve:hover { background: rgba(52,211,153,0.2); }
+        .action-delete { background: rgba(239,68,68,0.08); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .action-delete:hover { background: rgba(239,68,68,0.18); }
+        .btn-danger { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .btn-danger:hover { background: rgba(239,68,68,0.22); color: #fff; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        .modal {
+            background: #131825; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 36px; max-width: 420px; width: 90%;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        .modal-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; }
+        .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .modal p  { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.6; margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: 'Inter',sans-serif; cursor: pointer; border: none; transition: all 0.2s; }
+        .modal-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1) !important; }
+        .modal-cancel:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .modal-confirm { background: linear-gradient(135deg,#dc2626,#ef4444); color: #fff; }
+        .modal-confirm:hover { box-shadow: 0 4px 14px rgba(220,38,38,0.4); }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 64px 20px; }
+        .empty-state i { font-size: 40px; color: rgba(255,255,255,0.1); margin-bottom: 16px; }
+        .empty-state p { color: rgba(255,255,255,0.3); font-size: 14px; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🤖</div>
+        <span>AI Mail Intel</span>
+    </div>
+
+    <div class="sidebar-section">Navigation</div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="sidebar-link active"><i class="fas fa-table-columns"></i> Dashboard</a>
+        <a href="/stats"     class="sidebar-link"><i class="fas fa-chart-pie"></i> Analytics</a>
+        <a href="/"          class="sidebar-link"><i class="fas fa-envelope-open"></i> Submit Email</a>
+    </nav>
+
+    <div class="sidebar-section">Preferences</div>
+    <nav class="sidebar-nav">
+        <a href="/settings" class="sidebar-link"><i class="fas fa-sliders"></i> Settings</a>
+    </nav>
+    <div class="sidebar-section">Quick Filters</div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard?status=Pending"    class="sidebar-link"><i class="fas fa-clock"></i> Pending</a>
+        <a href="/dashboard?status=Escalated"  class="sidebar-link"><i class="fas fa-triangle-exclamation"></i> Escalated</a>
+        <a href="/dashboard?priority=High"     class="sidebar-link"><i class="fas fa-fire"></i> High Priority</a>
+        <a href="/dashboard?status=Needs Review" class="sidebar-link"><i class="fas fa-eye"></i> Needs Review</a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</aside>
+
+<main class="main">
+    <!-- Top bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1>Email Dashboard</h1>
+            <p>Manage and monitor all customer emails</p>
+        </div>
+        <div class="topbar-right">
+            <a href="/stats" class="btn btn-ghost"><i class="fas fa-chart-bar"></i> Analytics</a>
+            <button onclick="document.getElementById('clearModal').classList.add('open')" class="btn btn-danger"><i class="fas fa-trash"></i> Clear All</button>
+            <a href="/"      class="btn btn-primary"><i class="fas fa-plus"></i> New Email</a>
+        </div>
+    </div>
+
+    <!-- Stats row -->
+    {% set total    = emails | length %}
+    {% set pending  = emails | selectattr(6,'equalto','Pending')    | list | length %}
+    {% set resolved = emails | selectattr(6,'equalto','Resolved')   | list | length %}
+    {% set escalate = emails | selectattr(6,'equalto','Escalated')  | list | length %}
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon indigo"><i class="fas fa-inbox"></i></div>
+            <div class="stat-value">{{ emails | length }}</div>
+            <div class="stat-label">Total Emails</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
+            <div class="stat-value">{{ emails | selectattr(6,'equalto','Pending') | list | length }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-value">{{ emails | selectattr(6,'equalto','Resolved') | list | length }}</div>
+            <div class="stat-label">Resolved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+            <div class="stat-value">{{ emails | selectattr(6,'equalto','Escalated') | list | length }}</div>
+            <div class="stat-label">Escalated</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-card">
+        <div class="filters-title"><i class="fas fa-filter" style="margin-right:5px;"></i>Filters & Sorting</div>
+
+        <div class="filters-row">
+            <span class="filter-label">Status</span>
+            <a href="/dashboard" class="filter-chip">All</a>
+            <a href="/dashboard?status=Pending"      class="filter-chip chip-pending">⏳ Pending</a>
+            <a href="/dashboard?status=Resolved"     class="filter-chip chip-resolved">✅ Resolved</a>
+            <a href="/dashboard?status=Escalated"    class="filter-chip chip-escalated">🔴 Escalated</a>
+            <a href="/dashboard?status=Needs Review" class="filter-chip chip-review">👁 Needs Review</a>
+        </div>
+
+        <div class="filters-row">
+            <span class="filter-label">Priority</span>
+            <a href="/dashboard?priority=High"   class="filter-chip chip-high">🔥 High</a>
+            <a href="/dashboard?priority=Medium" class="filter-chip chip-medium">⚡ Medium</a>
+            <a href="/dashboard?priority=Low"    class="filter-chip chip-low">🟢 Low</a>
+        </div>
+
+        <div class="filters-row">
+            <span class="filter-label">Intent</span>
+            <a href="/dashboard?intent=refund"    class="filter-chip">💰 Refund</a>
+            <a href="/dashboard?intent=complaint" class="filter-chip">😠 Complaint</a>
+            <a href="/dashboard?intent=inquiry"   class="filter-chip">❓ Inquiry</a>
+            <a href="/dashboard?intent=feedback"  class="filter-chip">⭐ Feedback</a>
+        </div>
+
+        <div class="filters-row">
+            <span class="filter-label">Sort</span>
+            <a href="/dashboard?sort=latest"    class="filter-chip">🕐 Latest</a>
+            <a href="/dashboard?sort=high_conf" class="filter-chip">📈 Highest Confidence</a>
+            <a href="/dashboard?sort=low_conf"  class="filter-chip">📉 Lowest Confidence</a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <div class="table-header-bar">
+            <h3><i class="fas fa-list" style="margin-right:8px;color:#6366f1;"></i>Email Records</h3>
+            <span class="table-count">{{ emails | length }} results</span>
+        </div>
+
+        {% if emails %}
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Subject</th>
+                    <th>Sentiment</th>
+                    <th>Intent</th>
+                    <th>Confidence</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for email in emails %}
+            <tr>
+                <td style="color:rgba(255,255,255,0.25);font-size:12px;">{{ email[0] }}</td>
+                <td class="td-subject" title="{{ email[1] }}">{{ email[1] }}</td>
+                <td>
+                    {% if email[3] == 'Positive' %}
+                        <span class="sentiment-tag sent-positive"><i class="fas fa-face-smile"></i> Positive</span>
+                    {% elif email[3] == 'Negative' %}
+                        <span class="sentiment-tag sent-negative"><i class="fas fa-face-frown"></i> Negative</span>
+                    {% else %}
+                        <span class="sentiment-tag sent-neutral"><i class="fas fa-face-meh"></i> Neutral</span>
+                    {% endif %}
+                </td>
+                <td><span class="intent-tag"><i class="fas fa-tag"></i> {{ email[4] }}</span></td>
+                <td>
+                    <div class="conf-bar-wrap">
+                        <div class="conf-bar"><div class="conf-fill" style="width:{{ email[8] }}%"></div></div>
+                        <span class="conf-val">{{ email[8] }}%</span>
+                    </div>
+                </td>
+                <td>
+                    {% if email[7] == 'High' %}
+                        <span class="priority-dot priority-high">High</span>
+                    {% elif email[7] == 'Medium' %}
+                        <span class="priority-dot priority-medium">Medium</span>
+                    {% else %}
+                        <span class="priority-dot priority-low">Low</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if email[6] == 'Pending' %}
+                        <span class="badge badge-pending">Pending</span>
+                    {% elif email[6] == 'Resolved' %}
+                        <span class="badge badge-resolved">Resolved</span>
+                    {% elif email[6] == 'Escalated' %}
+                        <span class="badge badge-escalated">Escalated</span>
+                    {% else %}
+                        <span class="badge badge-review">Needs Review</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="actions">
+                        <a href="/edit/{{ email[0] }}"    class="action-btn action-edit"><i class="fas fa-pen"></i> Edit</a>
+                        <a href="/resolve/{{ email[0] }}" class="action-btn action-resolve"><i class="fas fa-check"></i> Resolve</a>
+                        <a href="/delete/{{ email[0] }}"  class="action-btn action-delete" onclick="return confirm('Delete this email record?')"><i class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No emails found. Try a different filter or submit a new email.</p>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Clear All Modal -->
+<div class="modal-overlay" id="clearModal">
+    <div class="modal">
+        <div class="modal-icon">🗑️</div>
+        <h3>Clear All Records?</h3>
+        <p>This will permanently delete <strong>all email records</strong> from the database. This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="modal-cancel" onclick="document.getElementById('clearModal').classList.remove('open')">Cancel</button>
+            <form method="POST" action="/clear" style="flex:1;">
+                <button type="submit" class="modal-confirm" style="width:100%;">Yes, Delete All</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
