@@ -3,7 +3,16 @@ import sqlite3
 from textblob import TextBlob
 import pickle
 from google import genai
-from config import ADMIN_USERNAME, ADMIN_PASSWORD, GEMINI_API_KEY, SECRET_KEY
+import os
+
+# Load secrets from environment variables (Render) or local config.py
+try:
+    from config import ADMIN_USERNAME, ADMIN_PASSWORD, GEMINI_API_KEY, SECRET_KEY
+except ImportError:
+    ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+    SECRET_KEY     = os.environ.get("SECRET_KEY", "changeme")
 
 # ---------------- GEMINI AI SETUP ----------------
 GEMINI_API_KEY = GEMINI_API_KEY
@@ -324,4 +333,5 @@ def settings():
     return render_template("settings.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
